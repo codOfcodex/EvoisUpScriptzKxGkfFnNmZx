@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Luau Obfuscator - Fixed</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(to bottom right, #0f172a, #1e1b4b, #0f172a);
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="p-6">
+    <div class="max-w-7xl mx-auto">
+        <div class="bg-slate-800/50 backdrop-blur-xl rounded-2xl shadow-2xl border border-indigo-500/20 overflow-hidden">
+            <div class="bg-gradient-to-r from-indigo-600 to-blue-600 p-6">
+                <div class="flex items-center gap-3">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <div>
+                        <h1 class="text-3xl font-bold text-white">Luau Obfuscator - Working Edition</h1>
+                        <p class="text-indigo-100 text-sm">String Encryption • Variable Renaming • Actually Works!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6">
+                <div class="flex gap-4 mb-4">
+                    <button onclick="toggleSettings()" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Settings
+                    </button>
+                    <button onclick="obfuscate()" class="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg transition font-semibold">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Obfuscate
+                    </button>
+                </div>
+
+                <div id="settings" class="hidden bg-slate-700/50 rounded-xl p-4 mb-4 grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <label class="flex items-center gap-2 text-white cursor-pointer">
+                        <input type="checkbox" id="stringEncryption" checked class="w-4 h-4 accent-indigo-600">
+                        <span class="text-sm">String Encryption</span>
+                    </label>
+                    <label class="flex items-center gap-2 text-white cursor-pointer">
+                        <input type="checkbox" id="variableRenaming" checked class="w-4 h-4 accent-indigo-600">
+                        <span class="text-sm">Variable Renaming</span>
+                    </label>
+                    <label class="flex items-center gap-2 text-white cursor-pointer">
+                        <input type="checkbox" id="wrapLoadstring" checked class="w-4 h-4 accent-indigo-600">
+                        <span class="text-sm">Loadstring Wrapper</span>
+                    </label>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-indigo-300 font-semibold">Source Code</label>
+                            <span class="text-xs text-gray-400" id="inputLength">0 chars</span>
+                        </div>
+                        <textarea id="input" placeholder="-- Paste your Luau code here&#10;print('Hello World')" class="w-full h-96 bg-slate-900/50 border border-indigo-500/30 rounded-lg p-4 text-gray-100 font-mono text-sm focus:outline-none focus:border-indigo-500 resize-none"></textarea>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-indigo-300 font-semibold">Obfuscated Output</label>
+                            <div class="flex gap-2">
+                                <button onclick="copyToClipboard()" id="copyBtn" class="hidden p-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition" title="Copy to clipboard">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                    </svg>
+                                </button>
+                                <button onclick="downloadFile()" id="downloadBtn" class="hidden p-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg transition" title="Download file">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <textarea id="output" readonly placeholder="-- Obfuscated code will appear here" class="w-full h-96 bg-slate-900/50 border border-indigo-500/30 rounded-lg p-4 text-green-400 font-mono text-sm resize-none"></textarea>
+                    </div>
+                </div>
+
+                <div class="mt-6 grid md:grid-cols-3 gap-4">
+                    <div class="bg-indigo-900/30 rounded-lg p-4 border border-indigo-500/20">
+                        <h3 class="text-indigo-300 font-semibold mb-2">🔐 String Encryption</h3>
+                        <p class="text-gray-400 text-sm">XOR encryption with dynamic keys per string</p>
+                    </div>
+                    <div class="bg-indigo-900/30 rounded-lg p-4 border border-indigo-500/20">
+                        <h3 class="text-indigo-300 font-semibold mb-2">🔤 Variable Renaming</h3>
+                        <p class="text-gray-400 text-sm">Confusing identifiers that preserve functionality</p>
+                    </div>
+                    <div class="bg-indigo-900/30 rounded-lg p-4 border border-indigo-500/20">
+                        <h3 class="text-indigo-300 font-semibold mb-2">📦 Loadstring Wrapper</h3>
+                        <p class="text-gray-400 text-sm">Encrypted code executed at runtime</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const inputEl = document.getElementById('input');
+        const outputEl = document.getElementById('output');
+        const inputLengthEl = document.getElementById('inputLength');
+        const copyBtn = document.getElementById('copyBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        inputEl.addEventListener('input', () => {
+            inputLengthEl.textContent = inputEl.value.length + ' chars';
+        });
+
+        function toggleSettings() {
+            document.getElementById('settings').classList.toggle('hidden');
+        }
+
+        function rndStr(len = 3) {
+            const chars = 'abcdefghijklmnopqrstuvwxyz';
+            let r = '';
+            for (let i = 0; i < len; i++) {
+                r += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return 'l' + r;
+        }
+
+        function encryptStr(str) {
+            if (!str) return '""';
+            const k = Math.floor(Math.random() * 200) + 50;
+            let result = 'string.char(';
+            for (let i = 0; i < str.length; i++) {
+                if (i > 0) result += ',';
+                result += (str.charCodeAt(i) ^ k);
+            }
+            result += ')';
+            
+            const kv = rndStr(2);
+            const wrapper = `(function()local ${kv}=${k};return ${result.replace(/\d+/g, n => `bit32.bxor(${n},${kv})`)}end)()`;
+            return wrapper;
+        }
+
+        function renameVars(code) {
+            const varMap = new Map();
+            const used = new Set();
+            const reserved = ['print', 'warn', 'wait', 'spawn', 'task', 'game', 'workspace', 'script', 
+                             'local', 'function', 'end', 'if', 'then', 'else', 'elseif', 'for', 'while', 
+                             'do', 'return', 'break', 'true', 'false', 'nil', 'and', 'or', 'not', 'in', 
+                             'repeat', 'until', 'string', 'table', 'math', 'bit32', 'type', 'pcall', 
+                             'xpcall', 'select', 'getfenv', 'setfenv', 'loadstring'];
+            
+            const localPat = /\blocal\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*=/g;
+            const funcPat = /\bfunction\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/g;
+            
+            const matches = [...code.matchAll(localPat), ...code.matchAll(funcPat)];
+            
+            matches.forEach(m => {
+                const old = m[1];
+                if (!reserved.includes(old) && !varMap.has(old)) {
+                    let newName;
+                    do {
+                        newName = rndStr(Math.floor(Math.random() * 2) + 2);
+                    } while (used.has(newName) || reserved.includes(newName));
+                    used.add(newName);
+                    varMap.set(old, newName);
+                }
+            });
+            
+            let result = code;
+            const sortedVars = Array.from(varMap.entries()).sort((a, b) => b[0].length - a[0].length);
+            
+            sortedVars.forEach(([oldName, newName]) => {
+                const regex = new RegExp(`\\b${oldName}\\b`, 'g');
+                result = result.replace(regex, newName);
+            });
+            
+            return result;
+        }
+
+        function obfuscate() {
+            const input = inputEl.value;
+            if (!input.trim()) {
+                outputEl.value = '-- No input provided';
+                return;
+            }
+
+            const settings = {
+                stringEncryption: document.getElementById('stringEncryption').checked,
+                variableRenaming: document.getElementById('variableRenaming').checked,
+                wrapLoadstring: document.getElementById('wrapLoadstring').checked
+            };
+
+            let code = input;
+            
+            if (settings.stringEncryption) {
+                code = code.replace(/"([^"]*)"/g, (match, str) => {
+                    if (str.length === 0) return '""';
+                    return encryptStr(str);
+                });
+                code = code.replace(/'([^']*)'/g, (match, str) => {
+                    if (str.length === 0) return '""';
+                    return encryptStr(str);
+                });
+            }
+            
+            if (settings.variableRenaming) {
+                code = renameVars(code);
+            }
+            
+            let final = code;
+            
+            if (settings.wrapLoadstring) {
+                const k = Math.floor(Math.random() * 200) + 50;
+                let encBytes = [];
+                for (let i = 0; i < final.length; i++) {
+                    encBytes.push(final.charCodeAt(i) ^ k);
+                }
+                
+                const lv = rndStr(3);
+                const kv = rndStr(3);
+                const rv = rndStr(3);
+                const iv = rndStr(3);
+                const fv = rndStr(3);
+                
+                final = `local ${lv}={${encBytes.join(',')}} local ${kv}=${k} local ${rv}={} for ${iv}=1,#${lv} do ${rv}[${iv}]=string.char(bit32.bxor(${lv}[${iv}],${kv})) end loadstring(table.concat(${rv}))()`;
+            }
+            
+            const header = `-- Obfuscated by Luau Obfuscator
+-- ${new Date().toISOString()}
+
+`;
+
+            outputEl.value = header + final;
+            copyBtn.classList.remove('hidden');
+            downloadBtn.classList.remove('hidden');
+        }
+
+        function copyToClipboard() {
+            outputEl.select();
+            document.execCommand('copy');
+            const btn = copyBtn;
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+            setTimeout(() => btn.innerHTML = orig, 2000);
+        }
+
+        function downloadFile() {
+            const blob = new Blob([outputEl.value], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'obfuscated_' + Date.now() + '.lua';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
